@@ -27,8 +27,8 @@ class mainScreenVC: UIViewController, CLLocationManagerDelegate, UITableViewDele
     var Day1Test : [String:[Double]] = ["Day1":[],"Day2":[],"Day3":[],"Day4":[],"Day5":[]]
     var MainWeatherTest : [String:[String]] = ["Day1":[],"Day2":[],"Day3":[],"Day4":[],"Day5":[]]
     var i = 0
-    var MainBackGroundColor = UIColor()
-    
+    var MainBackGroundColor = #colorLiteral(red: 0, green: 0.4784313725, blue: 1, alpha: 1)
+    var city = "Pretoria"
     
     
     
@@ -42,18 +42,41 @@ class mainScreenVC: UIViewController, CLLocationManagerDelegate, UITableViewDele
     @IBOutlet weak var backgroundImage: UIImageView!
     @IBOutlet weak var middleBarView: UIView!
     @IBOutlet weak var DaysOfTheWeektableView: UITableView!
-    
+    @IBOutlet weak var cityNameLable: UILabel!
     
    
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        locationManager.delegate = self
-        DaysOfTheWeektableView.dataSource = self
-        DaysOfTheWeektableView.delegate = self
-       DaysOfTheWeektableView.backgroundColor = #colorLiteral(red: 0, green: 0.4784313725, blue: 1, alpha: 1)
-        getCurrentWeather()
-       getNextFiveDaysWeather()
+        
+        let status = CLLocationManager.authorizationStatus()
+        switch status {
+        case .notDetermined:
+            DispatchQueue.main.async {
+            self.performSegue(withIdentifier: "AccessLocationVC", sender: nil)
+            }
+            
+        case .denied:
+            DispatchQueue.main.async {
+                self.performSegue(withIdentifier: "AccessLocationVC", sender: nil)
+            }
+        case .authorizedWhenInUse:
+            
+            locationManager.delegate = self
+            DaysOfTheWeektableView.dataSource = self
+            DaysOfTheWeektableView.delegate = self
+            DaysOfTheWeektableView.backgroundColor = #colorLiteral(red: 0, green: 0.4784313725, blue: 1, alpha: 1)
+            getCurrentWeather()
+            getNextFiveDaysWeather()
+            
+        default:
+            print("Not yet Determined")
+        }
+        
+        
+        
+        
+        
         
         
         
@@ -79,8 +102,8 @@ class mainScreenVC: UIViewController, CLLocationManagerDelegate, UITableViewDele
             
         }
    
-       // let request = URLRequest(url: URL(string: "https://api.openweathermap.org/data/2.5/forecast?lat=\(lat!)&lon=\(long!)&appid=\(api)")!)
-        let request = URLRequest(url: URL(string: "https://api.openweathermap.org/data/2.5/forecast?q=london,uk&appid=e4cd138deab3aca9ade2a8b4d390b11b")!)
+        let request = URLRequest(url: URL(string: "https://api.openweathermap.org/data/2.5/forecast?lat=\(lat!)&lon=\(long!)&appid=\(api)")!)
+        //let request = URLRequest(url: URL(string: "https://api.openweathermap.org/data/2.5/forecast?q=london,uk&appid=e4cd138deab3aca9ade2a8b4d390b11b")!)
         print(request)
         let session = URLSession.shared
         let task = session.dataTask(with: request, completionHandler: { data, response, error -> Void in
@@ -263,6 +286,11 @@ class mainScreenVC: UIViewController, CLLocationManagerDelegate, UITableViewDele
         
         
         locationManager.desiredAccuracy = kCLLocationAccuracyBest
+        
+        
+       
+        
+        
         if  let latitude = locationManager.location?.coordinate.latitude {
             
              lat = latitude
@@ -274,9 +302,22 @@ class mainScreenVC: UIViewController, CLLocationManagerDelegate, UITableViewDele
            // long = 28.174742713825285
         
         }
+         let location = CLLocation(latitude: lat, longitude: long)
         
-       // let request = URLRequest(url: URL(string: "https://api.openweathermap.org/data/2.5/weather?lat=\(lat!)&lon=\(long!)&appid=\(api)")!)
-        let request = URLRequest(url: URL(string: "https://api.openweathermap.org/data/2.5/weather?q=london,uk&appid=e4cd138deab3aca9ade2a8b4d390b11b")!)
+        CLGeocoder().reverseGeocodeLocation(location, completionHandler: {(placemarks, error) -> Void in
+            
+            //
+            //self.city = (placemarks?.first!.locality)!
+            //self.city = (placemarks?.first!.subLocality)!
+            print("This is the city you are in",self.city)
+            
+            
+        })
+        
+        
+        
+        let request = URLRequest(url: URL(string: "https://api.openweathermap.org/data/2.5/weather?lat=\(lat!)&lon=\(long!)&appid=\(api)")!)
+        //let request = URLRequest(url: URL(string: "https://api.openweathermap.org/data/2.5/weather?q=london,uk&appid=e4cd138deab3aca9ade2a8b4d390b11b")!)
         //print(request)
         let session = URLSession.shared
         let task = session.dataTask(with: request, completionHandler: { data, response, error -> Void in
@@ -308,7 +349,7 @@ class mainScreenVC: UIViewController, CLLocationManagerDelegate, UITableViewDele
                     self.minTempLabel.text = "\(Int(finalCurrentTempMin))°"
                     self.maxTempLabel.text = "\(Int(finalCurrentTempMax))°"
                     self.WeatherTypeLabel.text = weatherCondition
-                    
+                    self.cityNameLable.text = self.city
                     
                     switch weatherCondition{
                     case "Clouds" :

@@ -23,15 +23,9 @@ class allowAccesVC: UIViewController, CLLocationManagerDelegate {
     override func viewDidLoad() {
         super.viewDidLoad()
         locationManager.delegate = self
-        let status = CLLocationManager.authorizationStatus()
-       
-        switch status {
-        case .authorizedWhenInUse:
-            ChangeScreen()
-            print("verified")
-        default:
-            print("Not Yet Access")
-        }
+
+       welcomeText.text = "My name is 'The Weather Guy', and these are my friends. \n  Weather it up by allowing me to see your location? "
+    
         
         
     }
@@ -45,7 +39,16 @@ class allowAccesVC: UIViewController, CLLocationManagerDelegate {
     }
     
     func locationManager(_ manager: CLLocationManager, didChangeAuthorization status: CLAuthorizationStatus) {
-        getPremission()
+        
+        
+        switch status {
+        case .authorizedWhenInUse:
+            ChangeScreen()
+        default:
+            getPremission()
+        }
+        
+        
     }// END OF FUNC
     
     
@@ -62,7 +65,7 @@ class allowAccesVC: UIViewController, CLLocationManagerDelegate {
             allowAccessButton.isHidden = true
             welcomeText.text = "Nice work! Now click on the button already so i can show you, your weather!"
         case .denied:
-            allowAccessButton.setTitle("ACCES DENIED", for: UIControl.State.normal)
+            allowAccessButton.setTitle("ACCESS DENIED", for: UIControl.State.normal)
             
             
             let alert = UIAlertController(title: "ACCESS DENIED", message: "You denied access for us to see your location, unfortunately this app won't work if we don't have your location. If you want to change this please go to settings and manually change it.", preferredStyle: .alert)
@@ -105,7 +108,7 @@ class allowAccesVC: UIViewController, CLLocationManagerDelegate {
     // CHANGE TO THE MAIN SCREEN
     
     func ChangeScreen(){
-        performSegue(withIdentifier: "MainScreen", sender: self)
+        performSegue(withIdentifier: "MainScreen", sender: nil)
         
         
         
