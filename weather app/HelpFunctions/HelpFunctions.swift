@@ -7,9 +7,15 @@
 //
 
 import Foundation
+import UIKit
+import  CoreData
 
 
 class HelpFunctions{
+    var items : [FavLocations] = []
+
+    
+    
     
     
     // GET DAY OF THE WEEK EG. 1 = Sunday 2 = Monday
@@ -90,11 +96,161 @@ class HelpFunctions{
         for string in array {
             stringDictionary[string] = (stringDictionary[string] ?? 0) + 1
         }
-      print(stringDictionary)
+     
         
         return stringDictionary.sorted(by: {$0.value > $1.value}).first!.key
         
     }
     
     
-}
+    
+    
+    // SAVE FAV LOCATIONS TO CORE DATA
+    func SaveFavLocation(lat: Double,long: Double,Name: String){
+        let appdelegate = UIApplication.shared.delegate as? AppDelegate
+        
+        guard let content = appdelegate?.persistentContainer.viewContext else {return}
+        let appdata = FavLocations(context: content)
+        print(lat," This is the latitude it must save")
+        appdata.lat = lat
+        appdata.long = long
+        appdata.name = Name
+        
+        
+        do {
+            try content.save()
+            print("Saved")
+            
+        } catch  {
+            print(error.localizedDescription)
+        }
+        
+    }
+    
+    
+    // FETCH ALL FAV LOCATIONS
+    
+    func FetchSelectedLocation(NumberSelected: Int) -> (lat: Double, Long: Double){
+        
+        var latitude : Double?
+        var Longitude: Double?
+        
+        let appdelegate = UIApplication.shared.delegate as? AppDelegate
+        
+         let content = appdelegate?.persistentContainer.viewContext
+        
+        let fetch = NSFetchRequest<FavLocations>(entityName: "FavLocations")
+        
+        do {
+            try  items = content!.fetch(fetch)
+            
+            if items.isEmpty == false{
+                latitude = items[NumberSelected].lat
+                Longitude = items[NumberSelected].long
+                
+                
+            }
+            
+            
+        } catch  {
+            print(error.localizedDescription)
+        }
+        
+        return(latitude!,Longitude!)
+        
+    }
+    
+    
+    func FetchAllLocations() -> ([Double],[Double],[String]){
+        
+        var AllLat = [Double]()
+        var AllLong = [Double]()
+        var AllName = [String]()
+        
+        
+        
+        
+        let appdelegate = UIApplication.shared.delegate as? AppDelegate
+        
+       let content = appdelegate?.persistentContainer.viewContext
+        
+        let fetch = NSFetchRequest<FavLocations>(entityName: "FavLocations")
+        
+        do {
+            try  items = content!.fetch(fetch)
+            
+            print(items.count, "this is how many saved items you have")
+            if items.isEmpty == false{
+             
+                for item in items{
+                    
+                    AllLat.append(item.lat)
+                    AllLong.append(item.long)
+                    AllName.append(item.name!)
+                 
+                  
+                }
+                
+
+                
+            }
+            
+            
+        } catch  {
+            print(error.localizedDescription)
+        }
+        
+        return (AllLat,AllLong,AllName)
+        
+    }
+    
+    
+    // DELETE SELECTED LOCATION
+    
+    func DeleteSelectedLocation(CityName: String){
+        
+      
+        
+        let appdelegate = UIApplication.shared.delegate as? AppDelegate
+        
+        let content = appdelegate?.persistentContainer.viewContext
+        
+        let fetch = NSFetchRequest<FavLocations>(entityName: "FavLocations")
+        
+        do {
+            try  items = content!.fetch(fetch)
+            
+            if items.isEmpty == false{
+                
+                for item in items{
+                    
+                    if item.name == CityName{
+                    content?.delete(item)
+                        print("Item Deleted")
+                        do{
+                            try content?.save()
+                            
+                            
+                        }catch{
+                            
+                            print("Could not save")
+                        }
+                    }
+                    
+                }
+                
+            }
+            
+            
+        } catch  {
+            print(error.localizedDescription)
+        }
+        
+        
+        
+    }
+    
+    
+    
+    
+}// END OF CLASS

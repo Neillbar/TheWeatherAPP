@@ -8,6 +8,8 @@
 
 /* Begin PBXBuildFile section */
 		DA430B402316E8B1003A0B2D /* mainScreenVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA430B3F2316E8B1003A0B2D /* mainScreenVC.swift */; };
+		DA4D7C98231D133300E9FF6E /* SelectfavLocationVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA4D7C97231D133300E9FF6E /* SelectfavLocationVC.swift */; };
+		DA4D7C9A231D13B700E9FF6E /* SelectfavLocationCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA4D7C99231D13B700E9FF6E /* SelectfavLocationCell.swift */; };
 		DA6F3E7B2315B4E00000B4D9 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA6F3E7A2315B4E00000B4D9 /* AppDelegate.swift */; };
 		DA6F3E7D2315B4E00000B4D9 /* allowAccesVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA6F3E7C2315B4E00000B4D9 /* allowAccesVC.swift */; };
 		DA6F3E802315B4E00000B4D9 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = DA6F3E7E2315B4E00000B4D9 /* Main.storyboard */; };
@@ -49,6 +51,8 @@
 
 /* Begin PBXFileReference section */
 		DA430B3F2316E8B1003A0B2D /* mainScreenVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = mainScreenVC.swift; sourceTree = "<group>"; };
+		DA4D7C97231D133300E9FF6E /* SelectfavLocationVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SelectfavLocationVC.swift; sourceTree = "<group>"; };
+		DA4D7C99231D13B700E9FF6E /* SelectfavLocationCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SelectfavLocationCell.swift; sourceTree = "<group>"; };
 		DA6F3E772315B4E00000B4D9 /* weather app.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "weather app.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		DA6F3E7A2315B4E00000B4D9 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		DA6F3E7C2315B4E00000B4D9 /* allowAccesVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = allowAccesVC.swift; sourceTree = "<group>"; };
@@ -162,6 +166,7 @@
 			children = (
 				DA6F3E7C2315B4E00000B4D9 /* allowAccesVC.swift */,
 				DA430B3F2316E8B1003A0B2D /* mainScreenVC.swift */,
+				DA4D7C97231D133300E9FF6E /* SelectfavLocationVC.swift */,
 			);
 			path = "View Controllers ";
 			sourceTree = "<group>";
@@ -188,6 +193,7 @@
 			children = (
 				DAB2EC19231846B600666F5C /* DaysOfTheWeek.swift */,
 				DAB2EC222318635500666F5C /* tableViewCellDaysOfTheWeek.swift */,
+				DA4D7C99231D13B700E9FF6E /* SelectfavLocationCell.swift */,
 			);
 			path = Modules;
 			sourceTree = "<group>";
@@ -343,9 +349,11 @@
 				DAB2EC1F231861F000666F5C /* HelpFunctions.swift in Sources */,
 				DAB2EC1A231846B600666F5C /* DaysOfTheWeek.swift in Sources */,
 				DA6F3E832315B4E00000B4D9 /* weather_app.xcdatamodeld in Sources */,
+				DA4D7C98231D133300E9FF6E /* SelectfavLocationVC.swift in Sources */,
 				DAB2EC232318635500666F5C /* tableViewCellDaysOfTheWeek.swift in Sources */,
 				DA6F3E7D2315B4E00000B4D9 /* allowAccesVC.swift in Sources */,
 				DA6F3E7B2315B4E00000B4D9 /* AppDelegate.swift in Sources */,
+				DA4D7C9A231D13B700E9FF6E /* SelectfavLocationCell.swift in Sources */,
 				DA430B402316E8B1003A0B2D /* mainScreenVC.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

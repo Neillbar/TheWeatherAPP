@@ -8,12 +8,14 @@
 
 import UIKit
 import CoreLocation
+import CoreData
 
 class mainScreenVC: UIViewController, CLLocationManagerDelegate, UITableViewDelegate, UITableViewDataSource {
     
-    
+   
 
     //VAR & LET
+
     let locationManager = CLLocationManager()
     let api = "e4cd138deab3aca9ade2a8b4d390b11b"
     let kelvinAbsoluteZero :Double =  273.15
@@ -26,9 +28,16 @@ class mainScreenVC: UIViewController, CLLocationManagerDelegate, UITableViewDele
     var fullWeek = [daysOfTheWeek]()
     var Day1Test : [String:[Double]] = ["Day1":[],"Day2":[],"Day3":[],"Day4":[],"Day5":[]]
     var MainWeatherTest : [String:[String]] = ["Day1":[],"Day2":[],"Day3":[],"Day4":[],"Day5":[]]
-    var i = 0
+    var Counter = 0
     var MainBackGroundColor = #colorLiteral(red: 0, green: 0.4784313725, blue: 1, alpha: 1)
-    var city = "Pretoria"
+    var city = ""
+    var currentLatitude:  Double!
+    var currentLongitude:  Double!
+    var currentCityNameJson: String!
+    var currentCityNameCLLocationManager: String?
+    var liveLocation = true
+    var TimerToCHeckForLocationChanges = Timer()
+    var TimerTOrefreshAllData = Timer()
     
     
     
@@ -42,9 +51,11 @@ class mainScreenVC: UIViewController, CLLocationManagerDelegate, UITableViewDele
     @IBOutlet weak var backgroundImage: UIImageView!
     @IBOutlet weak var middleBarView: UIView!
     @IBOutlet weak var DaysOfTheWeektableView: UITableView!
-    @IBOutlet weak var cityNameLable: UILabel!
+    @IBOutlet weak var cityNameLabel: UILabel!
     
-   
+    @IBOutlet weak var LikeButton: UIButton!
+    
+    
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -69,6 +80,20 @@ class mainScreenVC: UIViewController, CLLocationManagerDelegate, UITableViewDele
             getCurrentWeather()
             getNextFiveDaysWeather()
             
+            TimerToCHeckForLocationChanges = Timer.scheduledTimer(withTimeInterval: 30, repeats: true, block: { (Timer) in
+            
+                self.locationManager.startUpdatingLocation()
+
+            })
+            TimerTOrefreshAllData = Timer.scheduledTimer(withTimeInterval: 600, repeats: true, block: { (Timer) in
+                
+                
+                self.getCurrentWeather()
+                self.getNextFiveDaysWeather()
+   
+            })
+            
+            
         default:
             print("Not yet Determined")
         }
@@ -84,52 +109,189 @@ class mainScreenVC: UIViewController, CLLocationManagerDelegate, UITableViewDele
     }
     
     
+    // GET CURRENT WEATHER
+    func getCurrentWeather(){
+        refreshAllData()
+        
+        if liveLocation == true{
+            locationManager.desiredAccuracy = kCLLocationAccuracyBest
+            currentLatitude = locationManager.location?.coordinate.latitude
+            currentLongitude = locationManager.location?.coordinate.longitude
+            
+            
+            
+            
+            
+            
+            let location = CLLocation(latitude: currentLatitude, longitude: currentLongitude)
+            
+            CLGeocoder().reverseGeocodeLocation(location, completionHandler: {(placemarks, error) -> Void in
+                
+                
+                if placemarks?.first!.subLocality != nil {
+                    self.city = (placemarks?.first!.subLocality)!
+                    self.currentCityNameCLLocationManager = self.city
+                    
+                }
+                
+                
+            })
+            
+        }// IF statement for current lat and long
+        
+        let request = URLRequest(url: URL(string: "https://api.openweathermap.org/data/2.5/weather?lat=\(currentLatitude!)&lon=\(currentLongitude!)&appid=\(api)")!)
+        
+        let session = URLSession.shared
+        let task = session.dataTask(with: request, completionHandler: { data, response, error -> Void in
+            // print(response!)
+        
+            
+            do {
+                let json = try JSONSerialization.jsonObject(with: data!) as! Dictionary<String, AnyObject>
+                // print(json)
+                // GET CURRENT TEMPRATURES
+            
+               //print(json)
+                
+                if json["cod"] as? String == "404"{
+                    DispatchQueue.main.async {
+                    
+                    let alert = UIAlertController(title: "Oops", message: "Something Goofed, Unfortunately we can't show you all the data now, we will try again in a bit", preferredStyle: UIAlertController.Style.alert)
+                    alert.addAction(UIAlertAction(title: "Ok", style: UIAlertAction.Style.default, handler: nil))
+                    self.present(alert, animated: true, completion: nil)
+                        
+                    }
+                }else{
+       
+                let main = json["main"]! as? NSDictionary
+                let TempWithoutKelvin = main!["temp"] as? Double
+                let TempMaxWithoutKelvin = main!["temp_max"] as? Double
+                let TempMinWithoutKelvin = main!["temp_min"] as? Double
+                let finalCurrentTemp = (TempWithoutKelvin! - self.kelvinAbsoluteZero).rounded()
+                let finalCurrentTempMin = (TempMinWithoutKelvin! - self.kelvinAbsoluteZero).rounded()
+                let finalCurrentTempMax = (TempMaxWithoutKelvin! - self.kelvinAbsoluteZero).rounded()
+                
+                // GET CURRENT WEATHER CONDITIONS
+                let weatherArray = json["weather"]! as? [[String:Any]]
+                let weatherCondition = weatherArray![0]["main"]! as? String
+                
+                // GET LOCATION
+                let CityID = json["name"]! as? String
+                
+                
+                
+                
+                // DISPLAY CURRENT WEATHER ON SCREEN
+                DispatchQueue.main.async {
+                    
+                    
+                    
+                    self.MainCurrentTempLabel.text = "\(Int(finalCurrentTemp))°"
+                    self.smallCurrentTempLabel.text = "\(Int(finalCurrentTemp))°"
+                    self.minTempLabel.text = "\(Int(finalCurrentTempMin))°"
+                    self.maxTempLabel.text = "\(Int(finalCurrentTempMax))°"
+                    self.WeatherTypeLabel.text = weatherCondition
+                    self.cityNameLabel.text = CityID
+                    self.currentCityNameJson = CityID!
+                    
+                    
+                    
+                    switch weatherCondition{
+                    case "Clouds" :
+                        self.backgroundImage.image = #imageLiteral(resourceName: "sea_cloudy")
+                        self.middleBarView.backgroundColor = #colorLiteral(red: 0.3294117647, green: 0.4431372549, blue: 0.4784313725, alpha: 1)
+                        self.MainBackGroundColor = #colorLiteral(red: 0.3294117647, green: 0.4431372549, blue: 0.4784313725, alpha: 1)
+                        self.view.backgroundColor = #colorLiteral(red: 0.3294117647, green: 0.4431372549, blue: 0.4784313725, alpha: 1)
+                        self.DaysOfTheWeektableView.backgroundColor = #colorLiteral(red: 0.3294117647, green: 0.4431372549, blue: 0.4784313725, alpha: 1)
+                        
+                    case "Clear" :
+                        self.backgroundImage.image = #imageLiteral(resourceName: "sea_sunnypng")
+                        self.MainBackGroundColor = #colorLiteral(red: 0, green: 0.4784313725, blue: 1, alpha: 1)
+                        self.view.backgroundColor = #colorLiteral(red: 0, green: 0.4784313725, blue: 1, alpha: 1)
+                        self.DaysOfTheWeektableView.backgroundColor = #colorLiteral(red: 0, green: 0.4784313725, blue: 1, alpha: 1)
+                        
+                    case "Rain" :
+                        self.backgroundImage.image = #imageLiteral(resourceName: "sea_rainy")
+                        self.middleBarView.backgroundColor = #colorLiteral(red: 0.3411764706, green: 0.3411764706, blue: 0.3647058824, alpha: 1)
+                        self.MainBackGroundColor = #colorLiteral(red: 0.3411764706, green: 0.3411764706, blue: 0.3647058824, alpha: 1)
+                        self.view.backgroundColor = #colorLiteral(red: 0.3411764706, green: 0.3411764706, blue: 0.3647058824, alpha: 1)
+                        self.DaysOfTheWeektableView.backgroundColor = #colorLiteral(red: 0.3411764706, green: 0.3411764706, blue: 0.3647058824, alpha: 1)
+                        
+                    default:
+                        self.backgroundImage.image = #imageLiteral(resourceName: "sea_sunnypng")
+                        self.MainBackGroundColor = #colorLiteral(red: 0, green: 0.4784313725, blue: 1, alpha: 1)
+                        
+                        
+                    }
+                    
+                    
+                    // SEE IF CURRENT CITY IS SAVED UNDER FAVOURITES
+                    let AllFavLocations = self.helpFunctions.FetchAllLocations()
+                    if AllFavLocations.2.contains(self.currentCityNameJson){
+                        
+                        self.LikeButton.isSelected = true
+                    }else{
+                        self.LikeButton.isSelected = false
+                        
+                    }
+                    
+                    
+                    
+                }
+    
+                 }// If there are no errors
+            }catch{
+                print(error.localizedDescription)
+            }
+            
+        })
+        task.resume()
+     
+        
+    }
+    
+    
+    
+    
+    
+    
+    
+    
+    //GET The next 5 days weather
+    
     func getNextFiveDaysWeather(){
-        var lat : Double!
-        var long : Double!
         
-        
-        locationManager.desiredAccuracy = kCLLocationAccuracyBest
-        if  let latitude = locationManager.location?.coordinate.latitude {
-            
-            lat = latitude
-           // lat = -25.868876232267652
-        }
-        if let longitude = locationManager.location?.coordinate.longitude{
-            
-            long = longitude
-           // long = 28.174742713825285
-            
-        }
+        refreshAllData()
    
-        let request = URLRequest(url: URL(string: "https://api.openweathermap.org/data/2.5/forecast?lat=\(lat!)&lon=\(long!)&appid=\(api)")!)
-        //let request = URLRequest(url: URL(string: "https://api.openweathermap.org/data/2.5/forecast?q=london,uk&appid=e4cd138deab3aca9ade2a8b4d390b11b")!)
-        print(request)
+        let request = URLRequest(url: URL(string: "https://api.openweathermap.org/data/2.5/forecast?lat=\(currentLatitude!)&lon=\(currentLongitude!)&appid=\(api)")!)
+        
         let session = URLSession.shared
         let task = session.dataTask(with: request, completionHandler: { data, response, error -> Void in
             // print(response!)
             do {
                 let json = try JSONSerialization.jsonObject(with: data!) as! Dictionary<String, AnyObject>
-              // print(json)
+               print(json)
                 let allInformation = json["list"]! as? [NSDictionary]
-               
-                
-                
+           
                 for _ in allInformation!{
-                    let dateSelected = allInformation![self.i]["dt_txt"] as? String
+                    
+                    if self.Counter < allInformation!.count{
+                    let dateSelected = allInformation![self.Counter]["dt_txt"] as? String
                     let ConvertedDate = self.helpFunctions.ConvertStringToDate(date: dateSelected!)
                     let CompareDate = self.helpFunctions.CompareDates(newestDate: ConvertedDate)
                    // print(CompareDate)
-                    let MainData = allInformation![self.i]["main"] as? NSDictionary
+                    let MainData = allInformation![self.Counter]["main"] as? NSDictionary
                     let MinTemp = MainData!["temp_min"] as? Double
                     let MaxTemp = MainData!["temp_max"] as? Double
-                    let Date = allInformation![self.i]["dt_txt"] as? String
-                    let WeatherData = allInformation![self.i]["weather"] as? [[String:Any]]
+                    let Date = allInformation![self.Counter]["dt_txt"] as? String
+                    let WeatherData = allInformation![self.Counter]["weather"] as? [[String:Any]]
                     let WeatherMain = WeatherData![0]["main"] as? String
                     let dayoftheweekint = self.helpFunctions.getDayOfWeek(Date!)
                     let dayoftheweek = self.helpFunctions.determineWhatDayItIs(intDay: dayoftheweekint!)
                    
-                    print(WeatherMain!)
+                    
+                    
+                 //   print(WeatherMain!)
                     
                     switch CompareDate{
                         
@@ -138,7 +300,7 @@ class mainScreenVC: UIViewController, CLLocationManagerDelegate, UITableViewDele
                             self.Day1Test["Day1"]?.append((MinTemp! - self.kelvinAbsoluteZero).rounded())
                             self.Day1Test["Day1"]?.append((MaxTemp! - self.kelvinAbsoluteZero).rounded())
                             self.MainWeatherTest["Day1"]?.append(WeatherMain!)
-                            var MostFrequentWeather = self.helpFunctions.getMostCommonString(array: self.MainWeatherTest["Day1"]! )
+                            let MostFrequentWeather = self.helpFunctions.getMostCommonString(array: self.MainWeatherTest["Day1"]! )
                             
                             
                             let newData = [daysOfTheWeek(TempMinandMax: self.Day1Test["Day1"]! , Date: Date!,Dayoftheweek: dayoftheweek, MainWeather: MostFrequentWeather)]
@@ -148,7 +310,7 @@ class mainScreenVC: UIViewController, CLLocationManagerDelegate, UITableViewDele
                             self.Day1Test["Day2"]?.append((MinTemp! - self.kelvinAbsoluteZero).rounded())
                             self.Day1Test["Day2"]?.append((MaxTemp! - self.kelvinAbsoluteZero).rounded())
                             self.MainWeatherTest["Day2"]?.append(WeatherMain!)
-                            var MostFrequentWeather = self.helpFunctions.getMostCommonString(array: self.MainWeatherTest["Day2"]! )
+                            let MostFrequentWeather = self.helpFunctions.getMostCommonString(array: self.MainWeatherTest["Day2"]! )
                            let newData = [daysOfTheWeek(TempMinandMax: self.Day1Test["Day2"]! , Date: Date!,Dayoftheweek: dayoftheweek,MainWeather: MostFrequentWeather)]
                             self.Day2.append(contentsOf: newData)
                         
@@ -156,7 +318,7 @@ class mainScreenVC: UIViewController, CLLocationManagerDelegate, UITableViewDele
                             self.Day1Test["Day3"]?.append((MinTemp! - self.kelvinAbsoluteZero).rounded())
                             self.Day1Test["Day3"]?.append((MaxTemp! - self.kelvinAbsoluteZero).rounded())
                             self.MainWeatherTest["Day3"]?.append(WeatherMain!)
-                            var MostFrequentWeather = self.helpFunctions.getMostCommonString(array: self.MainWeatherTest["Day3"]! )
+                            let MostFrequentWeather = self.helpFunctions.getMostCommonString(array: self.MainWeatherTest["Day3"]! )
                             let newData = [daysOfTheWeek(TempMinandMax: self.Day1Test["Day3"]! , Date: Date!,Dayoftheweek: dayoftheweek, MainWeather:MostFrequentWeather)]
                             self.Day3.append(contentsOf: newData)
                         
@@ -164,7 +326,7 @@ class mainScreenVC: UIViewController, CLLocationManagerDelegate, UITableViewDele
                             self.Day1Test["Day4"]?.append((MinTemp! - self.kelvinAbsoluteZero).rounded())
                             self.Day1Test["Day4"]?.append((MaxTemp! - self.kelvinAbsoluteZero).rounded())
                             self.MainWeatherTest["Day4"]?.append(WeatherMain!)
-                            var MostFrequentWeather = self.helpFunctions.getMostCommonString(array: self.MainWeatherTest["Day4"]! )
+                            let MostFrequentWeather = self.helpFunctions.getMostCommonString(array: self.MainWeatherTest["Day4"]! )
                            let newData = [daysOfTheWeek(TempMinandMax: self.Day1Test["Day4"]! , Date: Date!,Dayoftheweek: dayoftheweek,MainWeather: MostFrequentWeather)]
                             self.Day4.append(contentsOf: newData)
                         
@@ -172,7 +334,7 @@ class mainScreenVC: UIViewController, CLLocationManagerDelegate, UITableViewDele
                             self.Day1Test["Day5"]?.append((MinTemp! - self.kelvinAbsoluteZero).rounded())
                             self.Day1Test["Day5"]?.append((MaxTemp! - self.kelvinAbsoluteZero).rounded())
                             self.MainWeatherTest["Day5"]?.append(WeatherMain!)
-                            var MostFrequentWeather = self.helpFunctions.getMostCommonString(array: self.MainWeatherTest["Day5"]! )
+                            let MostFrequentWeather = self.helpFunctions.getMostCommonString(array: self.MainWeatherTest["Day5"]! )
                            let newData = [daysOfTheWeek(TempMinandMax: self.Day1Test["Day5"]! , Date: Date!,Dayoftheweek: dayoftheweek,MainWeather: MostFrequentWeather)]
                             self.Day5.append(contentsOf: newData)
                         
@@ -183,9 +345,9 @@ class mainScreenVC: UIViewController, CLLocationManagerDelegate, UITableViewDele
                     }
                     
         
-                    self.i = self.i + 1
+                   }// IF Counter is smaller than the rest
                    
-              
+                    self.Counter = self.Counter + 1
                 }
                 
                 DispatchQueue.main.async {
@@ -209,15 +371,14 @@ class mainScreenVC: UIViewController, CLLocationManagerDelegate, UITableViewDele
                 
             }catch{
                 
-                
-                
+              
             }
             
         })// end of task
     task.resume()
         
     
-    
+        
     
     }
     
@@ -279,116 +440,42 @@ class mainScreenVC: UIViewController, CLLocationManagerDelegate, UITableViewDele
   
     
     
-    // GET CURRENT WEATHER
-    func getCurrentWeather(){
-        var lat : Double!
-        var long : Double!
+
+    
+    
+    
+    
+    @IBAction func LikeButtonWasPressed(_ sender: Any) {
         
-        
-        locationManager.desiredAccuracy = kCLLocationAccuracyBest
-        
-        
+       
+        if LikeButton.isSelected == false{
+            
+            helpFunctions.SaveFavLocation(lat: currentLatitude!, long: currentLongitude!, Name: currentCityNameJson!)
+            LikeButton.isSelected = true
+            
+        }else{
+            
+            helpFunctions.DeleteSelectedLocation(CityName: currentCityNameJson)
+            LikeButton.isSelected = false
+            
+        }
        
         
         
-        if  let latitude = locationManager.location?.coordinate.latitude {
-            
-             lat = latitude
-            //lat = -25.868876232267652
-        }
-        if let longitude = locationManager.location?.coordinate.longitude{
-            
-             long = longitude
-           // long = 28.174742713825285
-        
-        }
-         let location = CLLocation(latitude: lat, longitude: long)
-        
-        CLGeocoder().reverseGeocodeLocation(location, completionHandler: {(placemarks, error) -> Void in
-            
-            //
-            //self.city = (placemarks?.first!.locality)!
-            //self.city = (placemarks?.first!.subLocality)!
-            print("This is the city you are in",self.city)
-            
-            
-        })
-        
-        
-        
-        let request = URLRequest(url: URL(string: "https://api.openweathermap.org/data/2.5/weather?lat=\(lat!)&lon=\(long!)&appid=\(api)")!)
-        //let request = URLRequest(url: URL(string: "https://api.openweathermap.org/data/2.5/weather?q=london,uk&appid=e4cd138deab3aca9ade2a8b4d390b11b")!)
-        //print(request)
-        let session = URLSession.shared
-        let task = session.dataTask(with: request, completionHandler: { data, response, error -> Void in
-            // print(response!)
-            do {
-                let json = try JSONSerialization.jsonObject(with: data!) as! Dictionary<String, AnyObject>
-        print(json)
-                // GET CURRENT TEMPRATURES
-                let main = json["main"]! as? NSDictionary
-                let TempWithoutKelvin = main!["temp"] as? Double
-                let TempMaxWithoutKelvin = main!["temp_max"] as? Double
-                let TempMinWithoutKelvin = main!["temp_min"] as? Double
-                let finalCurrentTemp = (TempWithoutKelvin! - self.kelvinAbsoluteZero).rounded()
-                let finalCurrentTempMin = (TempMinWithoutKelvin! - self.kelvinAbsoluteZero).rounded()
-                let finalCurrentTempMax = (TempMaxWithoutKelvin! - self.kelvinAbsoluteZero).rounded()
-                
-                // GET CURRENT WEATHER CONDITIONS
-                let weatherArray = json["weather"]! as? [[String:Any]]
-                let weatherCondition = weatherArray![0]["main"]! as? String
-                
-               
-                
-                
-                
-                 // DISPLAY CURRENT WEATHER ON SCREEN
-                DispatchQueue.main.async {
-                    self.MainCurrentTempLabel.text = "\(Int(finalCurrentTemp))°"
-                    self.smallCurrentTempLabel.text = "\(Int(finalCurrentTemp))°"
-                    self.minTempLabel.text = "\(Int(finalCurrentTempMin))°"
-                    self.maxTempLabel.text = "\(Int(finalCurrentTempMax))°"
-                    self.WeatherTypeLabel.text = weatherCondition
-                    self.cityNameLable.text = self.city
-                    
-                    switch weatherCondition{
-                    case "Clouds" :
-                        self.backgroundImage.image = #imageLiteral(resourceName: "sea_cloudy")
-                        self.middleBarView.backgroundColor = #colorLiteral(red: 0.3294117647, green: 0.4431372549, blue: 0.4784313725, alpha: 1)
-                        self.MainBackGroundColor = #colorLiteral(red: 0.3294117647, green: 0.4431372549, blue: 0.4784313725, alpha: 1)
-                        self.view.backgroundColor = #colorLiteral(red: 0.3294117647, green: 0.4431372549, blue: 0.4784313725, alpha: 1)
-                        self.DaysOfTheWeektableView.backgroundColor = #colorLiteral(red: 0.3294117647, green: 0.4431372549, blue: 0.4784313725, alpha: 1)
-                      
-                    case "Clear" :
-                        self.backgroundImage.image = #imageLiteral(resourceName: "sea_sunnypng")
-                            self.MainBackGroundColor = #colorLiteral(red: 0, green: 0.4784313725, blue: 1, alpha: 1)
-                        self.view.backgroundColor = #colorLiteral(red: 0, green: 0.4784313725, blue: 1, alpha: 1)
-                        self.DaysOfTheWeektableView.backgroundColor = #colorLiteral(red: 0, green: 0.4784313725, blue: 1, alpha: 1)
-                        
-                    case "Rain" :
-                        self.backgroundImage.image = #imageLiteral(resourceName: "sea_rainy")
-                        self.middleBarView.backgroundColor = #colorLiteral(red: 0.3411764706, green: 0.3411764706, blue: 0.3647058824, alpha: 1)
-                        self.MainBackGroundColor = #colorLiteral(red: 0.3411764706, green: 0.3411764706, blue: 0.3647058824, alpha: 1)
-                        self.view.backgroundColor = #colorLiteral(red: 0.3411764706, green: 0.3411764706, blue: 0.3647058824, alpha: 1)
-                        self.DaysOfTheWeektableView.backgroundColor = #colorLiteral(red: 0.3411764706, green: 0.3411764706, blue: 0.3647058824, alpha: 1)
-                        
-                    default:
-                        self.backgroundImage.image = #imageLiteral(resourceName: "sea_sunnypng")
-                        self.MainBackGroundColor = #colorLiteral(red: 0, green: 0.4784313725, blue: 1, alpha: 1)
-                        
-                        
-                    }
+    }
     
-                }
-               
-                
-                
-            }catch{
-                print(error.localizedDescription)
-            }
+    
+  
+ 
+    @IBAction func LocationButtonWasPressed(_ sender: Any) {
+        
+    
+    let AllLocations = helpFunctions.FetchAllLocations()
+    
+        if AllLocations.2.isEmpty == false{
             
-            })
-        task.resume()
+            performSegue(withIdentifier: "FavScreen", sender: nil)
+        }
         
         
     }
@@ -396,12 +483,82 @@ class mainScreenVC: UIViewController, CLLocationManagerDelegate, UITableViewDele
     
     
     
-  
-  
+    
+    
+    
+    
+    
+    func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
+        
+      
+        var lat: Double?
+        var Long: Double?
+        
+        
+            locationManager.desiredAccuracy = kCLLocationAccuracyBest
+            
+            
+            if  let latitude = locationManager.location?.coordinate.latitude {
+                
+                
+                lat = latitude
+                
+            }
+            if let longitude = locationManager.location?.coordinate.longitude{
+                
+                Long = longitude
+                
+                
+            }
+        
+        
+        let location = CLLocation(latitude: lat!, longitude: Long!)
+        
+                CLGeocoder().reverseGeocodeLocation(location, completionHandler: {(placemarks, error) -> Void in
+        
+                  
+                    if placemarks?.first!.subLocality != nil {
+                        self.city = (placemarks?.first!.subLocality)!
+                       // print(self.city)
+                    if self.city != self.currentCityNameCLLocationManager && self.liveLocation == true {
+                       
+                       
+                        self.getCurrentWeather()
+                        self.getNextFiveDaysWeather()
+                        self.locationManager.stopUpdatingLocation()
+                        //print("updating")
+                       
+                        
+                        
+                    }else{
+                       // print("Nothing to update")
+                        
+                         self.locationManager.stopUpdatingLocation()
+                      
+                        
+                        }
+                    }// is locality available?
+        
+                })
+        
  
+            
+    }
     
-   
+    func refreshAllData(){
+        Day1.removeAll()
+        Day2.removeAll()
+        Day3.removeAll()
+        Day4.removeAll()
+        Day5.removeAll()
+        fullWeek.removeAll()
+        Counter = 0
+        Day1Test  = ["Day1":[],"Day2":[],"Day3":[],"Day4":[],"Day5":[]]
+        MainWeatherTest = ["Day1":[],"Day2":[],"Day3":[],"Day4":[],"Day5":[]]
+        
+        
+    }
     
     
     
-}
+}// END OF CLASS
