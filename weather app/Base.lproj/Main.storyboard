@@ -167,7 +167,7 @@
                                             <autoresizingMask key="autoresizingMask"/>
                                             <subviews>
                                                 <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Wednesday" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="nW4-Kj-YQJ">
-                                                    <rect key="frame" x="5" y="19" width="146" height="21"/>
+                                                    <rect key="frame" x="5" y="19.5" width="146" height="20"/>
                                                     <constraints>
                                                         <constraint firstAttribute="width" constant="146" id="TS2-a4-lfe"/>
                                                     </constraints>
@@ -176,7 +176,7 @@
                                                     <nil key="highlightedColor"/>
                                                 </label>
                                                 <label opaque="NO" userInteractionEnabled="NO" contentMode="center" semanticContentAttribute="forceRightToLeft" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="10°" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="7tW-9i-fAd">
-                                                    <rect key="frame" x="280" y="19" width="69" height="21"/>
+                                                    <rect key="frame" x="280" y="19.5" width="69" height="20"/>
                                                     <constraints>
                                                         <constraint firstAttribute="width" constant="69" id="jk6-hz-Tbx"/>
                                                     </constraints>
@@ -192,7 +192,7 @@
                                                     </constraints>
                                                 </imageView>
                                                 <label opaque="NO" userInteractionEnabled="NO" contentMode="right" semanticContentAttribute="forceRightToLeft" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="10" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="NTI-QI-plU">
-                                                    <rect key="frame" x="349" y="19" width="60" height="21"/>
+                                                    <rect key="frame" x="349" y="19.5" width="60" height="20"/>
                                                     <constraints>
                                                         <constraint firstAttribute="width" constant="60" id="sxT-u6-myW"/>
                                                     </constraints>
@@ -335,7 +335,7 @@
                                         </subviews>
                                     </stackView>
                                 </subviews>
-                                <color key="backgroundColor" white="1" alpha="0.2824967893835616" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                 <constraints>
                                     <constraint firstAttribute="height" constant="53" id="0iB-q0-1qb"/>
                                     <constraint firstAttribute="bottom" secondItem="8nl-RG-Rya" secondAttribute="bottom" id="Q3r-II-ZUv"/>

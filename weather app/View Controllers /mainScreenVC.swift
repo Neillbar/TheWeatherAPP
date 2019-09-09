@@ -26,7 +26,7 @@ class mainScreenVC: UIViewController, CLLocationManagerDelegate, UITableViewDele
     var Day4 = [daysOfTheWeek]()
     var Day5 = [daysOfTheWeek]()
     var fullWeek = [daysOfTheWeek]()
-    var Day1Test : [String:[Double]] = ["Day1":[],"Day2":[],"Day3":[],"Day4":[],"Day5":[]]
+    var FullWeekDict : [String:[Double]] = ["Day1":[],"Day2":[],"Day3":[],"Day4":[],"Day5":[]]
     var MainWeatherTest : [String:[String]] = ["Day1":[],"Day2":[],"Day3":[],"Day4":[],"Day5":[]]
     var Counter = 0
     var MainBackGroundColor = #colorLiteral(red: 0, green: 0.4784313725, blue: 1, alpha: 1)
@@ -59,7 +59,7 @@ class mainScreenVC: UIViewController, CLLocationManagerDelegate, UITableViewDele
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        
+       
         let status = CLLocationManager.authorizationStatus()
         switch status {
         case .notDetermined:
@@ -207,6 +207,7 @@ class mainScreenVC: UIViewController, CLLocationManagerDelegate, UITableViewDele
                     case "Clear" :
                         self.backgroundImage.image = #imageLiteral(resourceName: "sea_sunnypng")
                         self.MainBackGroundColor = #colorLiteral(red: 0, green: 0.4784313725, blue: 1, alpha: 1)
+                        self.middleBarView.backgroundColor = #colorLiteral(red: 0, green: 0.4784313725, blue: 1, alpha: 1)
                         self.view.backgroundColor = #colorLiteral(red: 0, green: 0.4784313725, blue: 1, alpha: 1)
                         self.DaysOfTheWeektableView.backgroundColor = #colorLiteral(red: 0, green: 0.4784313725, blue: 1, alpha: 1)
                         
@@ -220,7 +221,7 @@ class mainScreenVC: UIViewController, CLLocationManagerDelegate, UITableViewDele
                     default:
                         self.backgroundImage.image = #imageLiteral(resourceName: "sea_sunnypng")
                         self.MainBackGroundColor = #colorLiteral(red: 0, green: 0.4784313725, blue: 1, alpha: 1)
-                        
+                        self.middleBarView.backgroundColor = #colorLiteral(red: 0, green: 0.4784313725, blue: 1, alpha: 1)
                         
                     }
                     
@@ -270,7 +271,7 @@ class mainScreenVC: UIViewController, CLLocationManagerDelegate, UITableViewDele
             // print(response!)
             do {
                 let json = try JSONSerialization.jsonObject(with: data!) as! Dictionary<String, AnyObject>
-               print(json)
+              // print(json)
                 let allInformation = json["list"]! as? [NSDictionary]
            
                 for _ in allInformation!{
@@ -297,45 +298,45 @@ class mainScreenVC: UIViewController, CLLocationManagerDelegate, UITableViewDele
                         
                         case 1:
                             
-                            self.Day1Test["Day1"]?.append((MinTemp! - self.kelvinAbsoluteZero).rounded())
-                            self.Day1Test["Day1"]?.append((MaxTemp! - self.kelvinAbsoluteZero).rounded())
+                            self.FullWeekDict["Day1"]?.append((MinTemp! - self.kelvinAbsoluteZero).rounded())
+                            self.FullWeekDict["Day1"]?.append((MaxTemp! - self.kelvinAbsoluteZero).rounded())
                             self.MainWeatherTest["Day1"]?.append(WeatherMain!)
                             let MostFrequentWeather = self.helpFunctions.getMostCommonString(array: self.MainWeatherTest["Day1"]! )
                             
                             
-                            let newData = [daysOfTheWeek(TempMinandMax: self.Day1Test["Day1"]! , Date: Date!,Dayoftheweek: dayoftheweek, MainWeather: MostFrequentWeather)]
+                            let newData = [daysOfTheWeek(TempMinandMax: self.FullWeekDict["Day1"]! , Date: Date!,Dayoftheweek: dayoftheweek, MainWeather: MostFrequentWeather)]
                            self.Day1.append(contentsOf: newData)
                        
                         case 2:
-                            self.Day1Test["Day2"]?.append((MinTemp! - self.kelvinAbsoluteZero).rounded())
-                            self.Day1Test["Day2"]?.append((MaxTemp! - self.kelvinAbsoluteZero).rounded())
+                            self.FullWeekDict["Day2"]?.append((MinTemp! - self.kelvinAbsoluteZero).rounded())
+                            self.FullWeekDict["Day2"]?.append((MaxTemp! - self.kelvinAbsoluteZero).rounded())
                             self.MainWeatherTest["Day2"]?.append(WeatherMain!)
                             let MostFrequentWeather = self.helpFunctions.getMostCommonString(array: self.MainWeatherTest["Day2"]! )
-                           let newData = [daysOfTheWeek(TempMinandMax: self.Day1Test["Day2"]! , Date: Date!,Dayoftheweek: dayoftheweek,MainWeather: MostFrequentWeather)]
+                           let newData = [daysOfTheWeek(TempMinandMax: self.FullWeekDict["Day2"]! , Date: Date!,Dayoftheweek: dayoftheweek,MainWeather: MostFrequentWeather)]
                             self.Day2.append(contentsOf: newData)
                         
                         case 3:
-                            self.Day1Test["Day3"]?.append((MinTemp! - self.kelvinAbsoluteZero).rounded())
-                            self.Day1Test["Day3"]?.append((MaxTemp! - self.kelvinAbsoluteZero).rounded())
+                            self.FullWeekDict["Day3"]?.append((MinTemp! - self.kelvinAbsoluteZero).rounded())
+                            self.FullWeekDict["Day3"]?.append((MaxTemp! - self.kelvinAbsoluteZero).rounded())
                             self.MainWeatherTest["Day3"]?.append(WeatherMain!)
                             let MostFrequentWeather = self.helpFunctions.getMostCommonString(array: self.MainWeatherTest["Day3"]! )
-                            let newData = [daysOfTheWeek(TempMinandMax: self.Day1Test["Day3"]! , Date: Date!,Dayoftheweek: dayoftheweek, MainWeather:MostFrequentWeather)]
+                            let newData = [daysOfTheWeek(TempMinandMax: self.FullWeekDict["Day3"]! , Date: Date!,Dayoftheweek: dayoftheweek, MainWeather:MostFrequentWeather)]
                             self.Day3.append(contentsOf: newData)
                         
                         case 4:
-                            self.Day1Test["Day4"]?.append((MinTemp! - self.kelvinAbsoluteZero).rounded())
-                            self.Day1Test["Day4"]?.append((MaxTemp! - self.kelvinAbsoluteZero).rounded())
+                            self.FullWeekDict["Day4"]?.append((MinTemp! - self.kelvinAbsoluteZero).rounded())
+                            self.FullWeekDict["Day4"]?.append((MaxTemp! - self.kelvinAbsoluteZero).rounded())
                             self.MainWeatherTest["Day4"]?.append(WeatherMain!)
                             let MostFrequentWeather = self.helpFunctions.getMostCommonString(array: self.MainWeatherTest["Day4"]! )
-                           let newData = [daysOfTheWeek(TempMinandMax: self.Day1Test["Day4"]! , Date: Date!,Dayoftheweek: dayoftheweek,MainWeather: MostFrequentWeather)]
+                           let newData = [daysOfTheWeek(TempMinandMax: self.FullWeekDict["Day4"]! , Date: Date!,Dayoftheweek: dayoftheweek,MainWeather: MostFrequentWeather)]
                             self.Day4.append(contentsOf: newData)
                         
                         case 5:
-                            self.Day1Test["Day5"]?.append((MinTemp! - self.kelvinAbsoluteZero).rounded())
-                            self.Day1Test["Day5"]?.append((MaxTemp! - self.kelvinAbsoluteZero).rounded())
+                            self.FullWeekDict["Day5"]?.append((MinTemp! - self.kelvinAbsoluteZero).rounded())
+                            self.FullWeekDict["Day5"]?.append((MaxTemp! - self.kelvinAbsoluteZero).rounded())
                             self.MainWeatherTest["Day5"]?.append(WeatherMain!)
                             let MostFrequentWeather = self.helpFunctions.getMostCommonString(array: self.MainWeatherTest["Day5"]! )
-                           let newData = [daysOfTheWeek(TempMinandMax: self.Day1Test["Day5"]! , Date: Date!,Dayoftheweek: dayoftheweek,MainWeather: MostFrequentWeather)]
+                           let newData = [daysOfTheWeek(TempMinandMax: self.FullWeekDict["Day5"]! , Date: Date!,Dayoftheweek: dayoftheweek,MainWeather: MostFrequentWeather)]
                             self.Day5.append(contentsOf: newData)
                         
                      default:
@@ -526,7 +527,7 @@ class mainScreenVC: UIViewController, CLLocationManagerDelegate, UITableViewDele
                         self.getCurrentWeather()
                         self.getNextFiveDaysWeather()
                         self.locationManager.stopUpdatingLocation()
-                        //print("updating")
+                       // print("updated the location")
                        
                         
                         
@@ -553,7 +554,7 @@ class mainScreenVC: UIViewController, CLLocationManagerDelegate, UITableViewDele
         Day5.removeAll()
         fullWeek.removeAll()
         Counter = 0
-        Day1Test  = ["Day1":[],"Day2":[],"Day3":[],"Day4":[],"Day5":[]]
+        FullWeekDict  = ["Day1":[],"Day2":[],"Day3":[],"Day4":[],"Day5":[]]
         MainWeatherTest = ["Day1":[],"Day2":[],"Day3":[],"Day4":[],"Day5":[]]
         
         

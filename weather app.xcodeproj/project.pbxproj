@@ -79,6 +79,7 @@
 		DAB2EC19231846B600666F5C /* DaysOfTheWeek.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DaysOfTheWeek.swift; sourceTree = "<group>"; };
 		DAB2EC1E231861F000666F5C /* HelpFunctions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HelpFunctions.swift; sourceTree = "<group>"; };
 		DAB2EC222318635500666F5C /* tableViewCellDaysOfTheWeek.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = tableViewCellDaysOfTheWeek.swift; sourceTree = "<group>"; };
+		DABA990B232637C80070209D /* simulator_location.gpx */ = {isa = PBXFileReference; lastKnownFileType = text.xml; name = simulator_location.gpx; path = "Location File/simulator_location.gpx"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -113,6 +114,7 @@
 				DA6F3E912315B4E30000B4D9 /* weather appTests */,
 				DA6F3E9C2315B4E30000B4D9 /* weather appUITests */,
 				DA6F3E782315B4E00000B4D9 /* Products */,
+				DABA990B232637C80070209D /* simulator_location.gpx */,
 			);
 			sourceTree = "<group>";
 		};

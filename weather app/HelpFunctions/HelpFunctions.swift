@@ -111,7 +111,7 @@ class HelpFunctions{
         
         guard let content = appdelegate?.persistentContainer.viewContext else {return}
         let appdata = FavLocations(context: content)
-        print(lat," This is the latitude it must save")
+       
         appdata.lat = lat
         appdata.long = long
         appdata.name = Name
@@ -178,8 +178,7 @@ class HelpFunctions{
         
         do {
             try  items = content!.fetch(fetch)
-            
-            print(items.count, "this is how many saved items you have")
+        
             if items.isEmpty == false{
              
                 for item in items{
